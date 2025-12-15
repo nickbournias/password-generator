@@ -13,11 +13,7 @@ window.onload = function () {
     generatePassword();
 };
 
-function outputLength() {
-    passLength = lengthInput.value;
-    lengthDisplay.innerText = lengthInput.value;
-    console.log("Password length is: ", passLength);
-}
+c
 
 function copyText() {
     const text = document.getElementById('passwordDisplay').textContent;
