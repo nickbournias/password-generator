@@ -1,83 +1,87 @@
-let numSelect = null;
-let symSelect = null;
-let charSelect = null;
-let passLength = null;
-let passList = "";
 let password = "";
-let passDisplay = "";
-let strength = "";
+let passLength = 12;
 
 window.onload = function () {
-    passLength = lengthInput.value;
-    lengthDisplay.innerText = lengthInput.value;
-    generatePassword();
+  const lengthInput = document.getElementById("lengthInput");
+  const lengthDisplay = document.getElementById("lengthDisplay");
+
+  passLength = lengthInput.value;
+  lengthDisplay.innerText = passLength;
+
+  generatePassword();
 };
 
 function outputLength() {
-    passLength = lengthInput.value;
-    lengthDisplay.innerText = lengthInput.value;
-    console.log("Password length is: ", passLength);
+  const lengthInput = document.getElementById("lengthInput");
+  const lengthDisplay = document.getElementById("lengthDisplay");
+
+  passLength = lengthInput.value;
+  lengthDisplay.innerText = passLength;
 }
 
 function copyText() {
-    const text = document.getElementById('passwordDisplay').textContent;
-    navigator.clipboard.writeText(text)
-        .then(() => {
-            console.log('Text copied to clipboard:', text);
-        })
-        .catch(err => {
-            console.error('Failed to copy text:', err);
-        });
+  const text = document.getElementById("passwordDisplay").textContent;
+  if (!text) return;
+
+  navigator.clipboard.writeText(text);
 }
 
-function evalStrength() {
-    strength = zxcvbn(password);
-    console.log(strength.score);
+function evaluateStrength(pw) {
+  let score = 0;
 
-    if (strength.score == 1) {
-        document.getElementById('passStrength').innerText = "Weak";
-        document.getElementById('passStrength').style.color = 'red';
-    } else if (strength.score == 2) {
-        document.getElementById('passStrength').innerText = "Medium";
-        document.getElementById('passStrength').style.color = 'orange';
-    } else if (strength.score == 3) {
-        document.getElementById('passStrength').innerText = "Strong";
-        document.getElementById('passStrength').style.color = 'green';
-    } else if (strength.score == 4) {
-        document.getElementById('passStrength').innerText = "Very Strong";
-        document.getElementById('passStrength').style.color = '#1B5E20';
-    }
+  const hasNumbers = /[0-9]/.test(pw);
+  const hasSymbols = /[^A-Za-z0-9]/.test(pw);
+  const hasLetters = /[A-Za-z]/.test(pw);
+
+  if (pw.length >= 8) score++;
+  if (pw.length >= 12) score++;
+  if (pw.length >= 16) score++;
+
+  if (hasLetters) score++;
+  if (hasNumbers) score++;
+  if (hasSymbols) score++;
+
+  const el = document.getElementById("passStrength");
+
+  if (score <= 2) {
+    el.innerText = "Very Weak";
+    el.style.color = "darkred";
+  } else if (score <= 3) {
+    el.innerText = "Weak";
+    el.style.color = "red";
+  } else if (score <= 4) {
+    el.innerText = "Medium";
+    el.style.color = "orange";
+  } else if (score <= 5) {
+    el.innerText = "Strong";
+    el.style.color = "green";
+  } else {
+    el.innerText = "Very Strong";
+    el.style.color = "#1B5E20";
+  }
 }
 
 function generatePassword() {
-    password = "";
-    passList = "";
-    counter = 0;
+  const numbers = document.getElementById("switchNumbers").checked;
+  const symbols = document.getElementById("switchSymbols").checked;
+  const letters = document.getElementById("switchMixed").checked;
 
-    numSelect = document.getElementById('switchNumbers').checked;
-    symSelect = document.getElementById('switchSymbols').checked;
-    charSelect = document.getElementById('switchMixed').checked;
+  if (!numbers && !symbols && !letters) {
+    document.getElementById("passwordDisplay").innerText = "select an option!";
+    document.getElementById("passStrength").innerText = "";
+    return;
+  }
 
-    if (!numSelect && !symSelect && !charSelect) {
-        document.getElementById('passwordDisplay').innerText = "select an option!";
-        return;
-    }
+  let pool = "";
+  if (numbers) pool += "0123456789";
+  if (symbols) pool += "!@#$%^&*()";
+  if (letters) pool += "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
-    if (numSelect) {
-        passList += "123456789";
-    }
-    if (symSelect) {
-        passList += "!@#$%^&*()";
-    }
-    if (charSelect) {
-        passList += "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-    }
+  password = "";
+  for (let i = 0; i < passLength; i++) {
+    password += pool[Math.floor(Math.random() * pool.length)];
+  }
 
-    while (counter < passLength) {
-        password += passList[Math.floor(Math.random() * passList.length)];
-        counter ++;
-    }
-
-    document.getElementById('passwordDisplay').innerText = password;
-    evalStrength();
+  document.getElementById("passwordDisplay").innerText = password;
+  evaluateStrength(password);
 }
